@@ -1,47 +1,46 @@
-import {useState} from 'react';
-import Notification from '../Notification/Notification';
-import FeedbackOptions from '../FeedbackOptions/FeedbackOptions';
-import Statistics from '../Statistics/Statistics';
-import { Container } from './App.styled.js';
+import { useState, useEffect } from 'react';
+import Form from '../Form/Form';
+import { Container, TitleMain, TitleBook, } from './App.styled.js'
+import ContactsList from '../ContactsList/ContactsList';
+import Filter from '../Filter/Filter';
 
 
-const initialValue = 0;
 
-export default function App() {
-    const [good, setGood] = useState(initialValue);
-    const [neutral, setNeutral] = useState(initialValue);
-    const [bad, setBad] = useState(initialValue); 
-    const [visible, setVisible] = useState(false);
-    const feedbackBtnEl = Object.keys({ good, neutral, bad });
-    const totalSum = good + neutral + bad;
-    const positiveFeed = Math.round(good / totalSum * 100)
+export default function App () {
+  const [contacts, setContacts] = useState(()=>{
+    return JSON.parse(window.localStorage.getItem('contacts')) ?? [];
+  });
+  const [filter, setFilter] = useState('');
 
-    const incrementStatistics = (e) => {
-        const { name } = e.target;
-        switch (name) {
-            case 'good':
-                setGood(state => state + 1)
-                break;
-            case 'neutral':
-                setNeutral(state => state + 1)
-                break;
-            case 'bad':
-                setBad(state => state + 1)
-                break;
-            default: console.log("Need to reload");
-        }
-        setVisible(true)
-    }
+  useEffect(() => {
+    window.localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-    return (
-        <Container>
-            <FeedbackOptions onLeaveFeedback={incrementStatistics} options={feedbackBtnEl} />
-            {!visible && <Notification message="No feedback given"/> }
-            {visible && <Statistics good={good} neutral={neutral} bad={bad} total={totalSum} positivePercentage={positiveFeed}/>}
-        </Container>
+   const deleteContact = contactId => {
+    setContacts((state) => state.filter(contact=> contact.id !== contactId)
     )
-}
+  }
 
+  const formSubmit = (data) => {
+    setContacts([...contacts, data]);
+  }
+
+
+  const getVisibleContacts = () => {
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter(contact =>contact.name.toLowerCase().includes(normalizedFilter))
+  }
+
+  return (
+    <Container>
+      <TitleMain>Phonebook</TitleMain>
+      <Form onSubmit={formSubmit} data={contacts} />
+      <TitleBook>Contacts</TitleBook>
+      <Filter onChange={(e) => setFilter(e.currentTarget.value)} value={filter}/>
+      <ContactsList contacts={getVisibleContacts()} onDeleteContact={deleteContact} />
+    </Container>
+  )
+}
 
 
 
