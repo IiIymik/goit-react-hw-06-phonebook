@@ -1,17 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import './index.css';
 import App from './components/App/App.jsx';
 import './utils/nanoid.js';
 import store from './redux/store.js';
-import { saveContact } from './redux/actions.js';
-console.log('🚀 ~ file: index.js ~ line 7 ~ store', store.getState());
-
-store.dispatch(saveContact(10));
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>,
   document.getElementById('root'),
 );

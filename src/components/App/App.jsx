@@ -1,30 +1,13 @@
-import { useState, useEffect } from 'react';
+// import { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import Form from '../Form/Form';
 import { Container, TitleMain, TitleBook, } from './App.styled.js'
 import ContactsList from '../ContactsList/ContactsList';
 import Filter from '../Filter/Filter';
+import * as actions from 'redux/contacts/contacts-actions';
 
 
-
-export default function App () {
-  const [contacts, setContacts] = useState(()=>{
-    return JSON.parse(window.localStorage.getItem('contacts')) ?? [];
-  });
-  const [filter, setFilter] = useState('');
-
-  useEffect(() => {
-    window.localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-   const deleteContact = contactId => {
-    setContacts((state) => state.filter(contact=> contact.id !== contactId)
-    )
-  }
-
-  const formSubmit = (data) => {
-    setContacts([...contacts, data]);
-  }
-
+function App({ contacts, filter, addContact, deleteContact, addFilterValue }) {
 
   const getVisibleContacts = () => {
     const normalizedFilter = filter.toLowerCase();
@@ -34,13 +17,30 @@ export default function App () {
   return (
     <Container>
       <TitleMain>Phonebook</TitleMain>
-      <Form onSubmit={formSubmit} data={contacts} />
+      <Form onSubmit={addContact} data={contacts} />
       <TitleBook>Contacts</TitleBook>
-      <Filter onChange={(e) => setFilter(e.currentTarget.value)} value={filter}/>
-      <ContactsList contacts={getVisibleContacts()} onDeleteContact={deleteContact} />
+      <Filter onChange={(e) => addFilterValue(e.currentTarget.value)} value={filter} />
+      <ContactsList contacts={getVisibleContacts(contacts)} onDeleteContact={deleteContact} />
     </Container>
   )
 }
+
+const mapStateToProps = state => ({
+  contacts: state.contacts.items,
+  filter: state.contacts.filter,
+})
+
+const mapDispatchToProps = dispatch => ({
+  addContact: (obj) => dispatch(actions.addContact(obj)),
+  deleteContact: (contactId) => dispatch(actions.deleteContact(contactId)),
+  addFilterValue: (value) => dispatch(actions.addFilterValue(value)),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+
+
+
+
 
 
 

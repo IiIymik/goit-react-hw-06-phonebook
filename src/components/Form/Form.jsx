@@ -13,7 +13,9 @@ export default function Form({ data, onSubmit }) {
       name,
       number,
     };
-    const compare = checkContact(data, obj)
+
+    const compare = checkContact(data, obj);
+
     if (compare) {
       alert(`${compare.name} is already in contacts`)
       return reset();
